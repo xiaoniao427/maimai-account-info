@@ -8,8 +8,8 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-24.04  # 使用 Ubuntu 24.04，它预装 Java 17
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -19,11 +19,11 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+        cache: 'gradle'
 
-    # 使用另一个 Android SDK 安装方法
-    - name: Setup Android SDK
+    - name: Setup Android SDK manually
       run: |
-        # 下载命令行工具
+        # 手动安装 Android SDK，避免使用有问题的 Action
         wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
         mkdir -p $HOME/android-sdk/cmdline-tools
         unzip -q commandlinetools-linux-11076708_latest.zip -d $HOME/android-sdk/cmdline-tools
@@ -32,23 +32,24 @@ jobs:
         # 设置环境变量
         echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
         echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-        echo "$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
+        echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
         
         # 接受许可证
         yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
         
-        # 安装必要的组件
-        $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+        # 安装必要的 Android SDK 组件
+        $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+        
+        # 验证安装
+        echo "Android SDK installed at: $ANDROID_SDK_ROOT"
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
     - name: Build with Gradle
       run: |
-        ./gradlew assembleDebug \
-          --no-daemon \
-          --stacktrace \
-          --warning-mode=all
+        ./gradlew clean
+        ./gradlew assembleDebug --stacktrace --info
 
     - name: Upload APK
       if: success()
