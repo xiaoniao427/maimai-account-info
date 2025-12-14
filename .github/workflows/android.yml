@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # 使用 Ubuntu 24.04，它预装了更新的工具
 
     steps:
     - name: Checkout code
@@ -20,34 +20,32 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v4
-      with:
-        api-level: 34
-        build-tools-version: '34.0.0'
-        cmdline-tools-version: 'latest'
+    - name: Setup Android SDK using sdkmanager
+      run: |
+        # 确保使用正确的 Java 版本
+        export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+        export PATH=$JAVA_HOME/bin:$PATH
+        
+        # 检查 Java 版本
+        java -version
+        
+        # 使用系统已安装的 sdkmanager
+        sdkmanager --version
+        
+        # 安装必要的 Android SDK 组件
+        sdkmanager --install "platforms;android-34"
+        sdkmanager --install "build-tools;34.0.0"
+        sdkmanager --install "platform-tools"
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-
-    - name: Cache Gradle dependencies
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
 
     - name: Build with Gradle
       run: |
         ./gradlew assembleDebug \
           --no-daemon \
           --stacktrace \
-          --warning-mode=all \
-          -Dorg.gradle.welcome=never \
-          -Dorg.gradle.console=plain
+          --warning-mode=all
 
     - name: Upload APK
       if: success()
