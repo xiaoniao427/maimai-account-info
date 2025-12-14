@@ -1,2 +1,0 @@
-include ':app'
-rootProject.name = "获取舞萌账户信息"
