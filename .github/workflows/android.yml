@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04  # 使用 Ubuntu 24.04，它预装了更新的工具
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
@@ -20,22 +20,25 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Android SDK using sdkmanager
+    # 使用另一个 Android SDK 安装方法
+    - name: Setup Android SDK
       run: |
-        # 确保使用正确的 Java 版本
-        export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-        export PATH=$JAVA_HOME/bin:$PATH
+        # 下载命令行工具
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+        mkdir -p $HOME/android-sdk/cmdline-tools
+        unzip -q commandlinetools-linux-11076708_latest.zip -d $HOME/android-sdk/cmdline-tools
+        mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
         
-        # 检查 Java 版本
-        java -version
+        # 设置环境变量
+        echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+        echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+        echo "$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
         
-        # 使用系统已安装的 sdkmanager
-        sdkmanager --version
+        # 接受许可证
+        yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
         
-        # 安装必要的 Android SDK 组件
-        sdkmanager --install "platforms;android-34"
-        sdkmanager --install "build-tools;34.0.0"
-        sdkmanager --install "platform-tools"
+        # 安装必要的组件
+        $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
