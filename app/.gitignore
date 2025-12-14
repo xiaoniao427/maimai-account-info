@@ -1,0 +1,42 @@
+# Android Studio 文件
+*.iml
+.gradle
+/.idea/
+/local.properties
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx/
+
+# 构建文件
+*/build/
+*.apk
+*.aar
+*.ap_
+
+# Gradle
+.gradle/
+gradle-app.setting
+
+# 敏感信息
+*.keystore
+*.jks
+
+# 日志文件
+*.log
+
+# 快速修复 (FIXME) 文件
+*.orig
+
+# 缓存
+.cache/
+
+# 代码覆盖
+*.jacoco
+*.coverage
+.coverage/
+
+# 依赖
+.idea/libraries/
+libs/
