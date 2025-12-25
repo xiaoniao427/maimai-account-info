@@ -1,0 +1,140 @@
+package com.maimai.account.info.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.maimai.account.info.model.UserInfo
+import com.maimai.account.info.network.ApiService
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+class MainViewModel : ViewModel() {
+    // UI状态
+    private val _uiState = MutableStateFlow<UIState>(UIState.Idle)
+    val uiState: StateFlow<UIState> = _uiState.asStateFlow()
+    
+    // 用户输入
+    private val _userId = MutableStateFlow("")
+    val userId: StateFlow<String> = _userId.asStateFlow()
+    
+    private val _importToken = MutableStateFlow("")
+    val importToken: StateFlow<String> = _importToken.asStateFlow()
+    
+    private val _getItems = MutableStateFlow(false)
+    val getItems: StateFlow<Boolean> = _getItems.asStateFlow()
+    
+    // 日志
+    private val _logs = MutableStateFlow<List<String>>(emptyList())
+    val logs: StateFlow<List<String>> = _logs.asStateFlow()
+    
+    // 用户信息
+    private val _userInfo = MutableStateFlow<UserInfo?>(null)
+    val userInfo: StateFlow<UserInfo?> = _userInfo.asStateFlow()
+    
+    sealed class UIState {
+        object Idle : UIState()
+        object GettingUserId : UIState()
+        object GettingUserInfo : UIState()
+        data class Error(val message: String) : UIState()
+    }
+    
+    fun updateUserId(userId: String) {
+        _userId.value = userId
+    }
+    
+    fun updateImportToken(token: String) {
+        _importToken.value = token
+    }
+    
+    fun updateGetItems(getItems: Boolean) {
+        _getItems.value = getItems
+    }
+    
+    fun getUserIdFromQR(qrCode: String) {
+        viewModelScope.launch {
+            _uiState.value = UIState.GettingUserId
+            addLog("正在获取UserID...")
+            
+            val result = ApiService.getUserId(qrCode)
+            
+            if (result.isSuccess) {
+                val userId = result.getOrNull()?.toString() ?: ""
+                _userId.value = userId
+                addLog("✅ UserID获取成功: $userId")
+                _uiState.value = UIState.Idle
+            } else {
+                val errorMessage = "❌ ${result.exceptionOrNull()?.message ?: "未知错误"}"
+                addLog(errorMessage)
+                _uiState.value = UIState.Error(errorMessage)
+            }
+        }
+    }
+    
+    fun getUserInfo() {
+        val userIdStr = _userId.value.trim()
+        
+        // 验证输入
+        if (userIdStr.isEmpty()) {
+            addLog("错误: 请输入用户ID")
+            _uiState.value = UIState.Error("请输入用户ID")
+            return
+        }
+        
+        if (!userIdStr.matches(Regex("\\d{8}"))) {
+            addLog("错误: 用户ID必须是8位数字")
+            _uiState.value = UIState.Error("用户ID必须是8位数字")
+            return
+        }
+        
+        val userId = userIdStr.toIntOrNull() ?: run {
+            addLog("错误: 用户ID格式错误")
+            _uiState.value = UIState.Error("用户ID格式错误")
+            return
+        }
+        
+        viewModelScope.launch {
+            _uiState.value = UIState.GettingUserInfo
+            addLog("正在查询舞萌账户信息...")
+            
+            val result = ApiService.getUserInfo(
+                userId = userId,
+                importToken = _importToken.value.ifEmpty { null },
+                getItems = _getItems.value
+            )
+            
+            if (result.isSuccess) {
+                val userInfo = result.getOrNull()
+                _userInfo.value = userInfo
+                
+                userInfo?.let {
+                    addLog("✅ 查询成功: ${it.userName}")
+                    addLog("评级总分: ${it.rating}")
+                    addLog("登录状态: ${if (it.isLogin) "已登录" else "未登录"}")
+                    addLog("=".repeat(40))
+                }
+                
+                _uiState.value = UIState.Idle
+            } else {
+                val errorMessage = "❌ ${result.exceptionOrNull()?.message ?: "查询失败"}"
+                addLog(errorMessage)
+                _uiState.value = UIState.Error(errorMessage)
+            }
+        }
+    }
+    
+    fun clearLogs() {
+        _logs.value = emptyList()
+        _userInfo.value = null
+    }
+    
+    private fun addLog(message: String) {
+        val timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+        val logEntry = "[$timestamp] $message"
+        
+        _logs.value = _logs.value + logEntry
+    }
+}

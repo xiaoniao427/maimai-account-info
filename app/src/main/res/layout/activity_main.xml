@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#f5f5f5">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="获取舞萌账户信息"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"
+        android:textColor="#000000" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="用户ID:"
+            android:textSize="14sp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="8dp"
+            android:textColor="#666666" />
+
+        <EditText
+            android:id="@+id/editUserId"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="number"
+            android:maxLength="8"
+            android:hint="8位数字"
+            android:background="@android:drawable/editbox_background"
+            android:padding="12dp" />
+
+        <Button
+            android:id="@+id/btnGetUserId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="获取"
+            android:background="#2196F3"
+            android:textColor="#ffffff"
+            android:layout_marginStart="8dp"
+            android:padding="8dp" />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="importToken (可选):"
+        android:textSize="14sp"
+        android:layout_marginBottom="4dp"
+        android:textColor="#666666" />
+
+    <EditText
+        android:id="@+id/editToken"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:hint="第三方平台更新用，可不填"
+        android:background="@android:drawable/editbox_background"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"
+        android:minLines="2"
+        android:maxLines="3" />
+
+    <CheckBox
+        android:id="@+id/checkGetItems"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="获取物品信息"
+        android:textSize="14sp"
+        android:layout_marginBottom="16dp"
+        android:textColor="#666666" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/btnQuery"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="查询账户信息"
+            android:background="#FF5722"
+            android:textColor="#ffffff"
+            android:layout_marginEnd="8dp"
+            android:padding="12dp" />
+
+        <Button
+            android:id="@+id/btnClear"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="清空结果"
+            android:background="#9E9E9E"
+            android:textColor="#ffffff"
+            android:layout_marginStart="8dp"
+            android:padding="12dp" />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="查询结果:"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp"
+        android:textColor="#000000" />
+
+    <ScrollView
+        android:id="@+id/scrollResult"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#ffffff"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/txtResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="12sp"
+            android:textColor="#000000"
+            android:typeface="monospace" />
+
+    </ScrollView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="提示：点击【获取】按钮可以通过二维码信息自动获取UserID"
+        android:textSize="10sp"
+        android:layout_marginTop="8dp"
+        android:textColor="#999999" />
+
+</LinearLayout>

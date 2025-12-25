@@ -1,0 +1,41 @@
+package com.maimai.account.info.ui.theme
+
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+
+// 定义你的Material 3亮色配色方案
+private val LightColorScheme = lightColorScheme(
+    primary = // 你的主色，例如：Color(0xFF6750A4),
+    onPrimary = // 主色上的内容色，例如：Color(0xFFFFFFFF),
+    primaryContainer = // 主色容器色，
+    onPrimaryContainer = // 容器上的内容色，
+    // ... 可以继续定义secondary, surface等其他颜色
+)
+
+// 定义暗色配色方案
+private val DarkColorScheme = darkColorScheme(
+    primary = // 暗色模式下的主色，
+    onPrimary = // 暗色模式下主色上的内容色，
+    // ... 与亮色方案对应
+)
+
+@Composable
+fun MaimaiAccountInfoTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+    val colorScheme = if (darkTheme) {
+        DarkColorScheme
+    } else {
+        LightColorScheme
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = Typography, // 如果你定义了字体，这里传入
+        content = content
+    )
+}

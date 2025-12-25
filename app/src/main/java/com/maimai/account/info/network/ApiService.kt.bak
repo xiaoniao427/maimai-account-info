@@ -1,0 +1,92 @@
+package com.maimai.account.info.network
+
+import com.maimai.account.info.model.QRResponse
+import com.maimai.account.info.model.UserInfo
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.logging.HttpLoggingInterceptor
+import java.util.concurrent.TimeUnit
+
+object ApiService {
+    private const val BASE_URL = "https://api.salt.realtvop.top"
+    private val json = Json { ignoreUnknownKeys = true }
+    
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(15, TimeUnit.SECONDS)
+        .writeTimeout(15, TimeUnit.SECONDS)
+        .addInterceptor(HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BASIC
+        })
+        .build()
+    
+    fun getUserId(qrCode: String): Result<Int> {
+        return try {
+            val requestBody = """{"qrCode":"$qrCode"}""".toRequestBody("application/json".toMediaType())
+            
+            val request = Request.Builder()
+                .url("$BASE_URL/getQRInfo")
+                .post(requestBody)
+                .addHeader("User-Agent", "Mozilla/5.0 (Android; Mobile) AppleWebKit/537.36")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "*/*")
+                .addHeader("Origin", "https://salt.realtvop.top")
+                .addHeader("X-Requested-With", "mark.via")
+                .build()
+            
+            val response = client.newCall(request).execute()
+            
+            if (response.isSuccessful) {
+                val jsonResponse = response.body?.string() ?: ""
+                val qrResponse = json.decodeFromString<QRResponse>(jsonResponse)
+                
+                if (qrResponse.errorID == 0 && qrResponse.userID > 0) {
+                    Result.success(qrResponse.userID)
+                } else {
+                    Result.failure(Exception("错误代码: ${qrResponse.errorID}"))
+                }
+            } else {
+                Result.failure(Exception("HTTP错误: ${response.code}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    fun getUserInfo(userId: Int, importToken: String?, getItems: Boolean): Result<UserInfo> {
+        return try {
+            val requestBody = buildString {
+                append("""{"userId":$userId,"getItems":$getItems""")
+                if (!importToken.isNullOrEmpty()) {
+                    append(""","importToken":"$importToken"""")
+                }
+                append("}")
+            }.toRequestBody("application/json".toMediaType())
+            
+            val request = Request.Builder()
+                .url("$BASE_URL/updateUser")
+                .post(requestBody)
+                .addHeader("User-Agent", "Mozilla/5.0 (Android; Mobile) AppleWebKit/537.36")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "*/*")
+                .addHeader("Origin", "https://salt.realtvop.top")
+                .addHeader("X-Requested-With", "mark.via")
+                .build()
+            
+            val response = client.newCall(request).execute()
+            
+            if (response.isSuccessful) {
+                val jsonResponse = response.body?.string() ?: ""
+                val userInfo = json.decodeFromString<UserInfo>(jsonResponse)
+                Result.success(userInfo)
+            } else {
+                Result.failure(Exception("HTTP错误: ${response.code}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
