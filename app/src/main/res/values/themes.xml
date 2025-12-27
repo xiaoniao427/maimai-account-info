@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Base application theme. -->
-    <style name="Theme.MaimaiAccountInfo" parent="Theme.AppCompat.DayNight.NoActionBar">
+<style name="Theme.MaimaiAccountInfo" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- 可自定义颜色，但先留空保证编译通过 -->
     </style>
 </resources>
